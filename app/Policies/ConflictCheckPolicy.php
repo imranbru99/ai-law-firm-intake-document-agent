@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Policies;
+
+use App\Enums\UserRole;
+use App\Models\ConflictCheck;
+use App\Models\User;
+
+class ConflictCheckPolicy
+{
+    public function viewAny(User $user): bool
+    {
+        return $user->role !== UserRole::Client;
+    }
+
+    public function view(User $user, ConflictCheck $conflictCheck): bool
+    {
+        return $this->viewAny($user);
+    }
+
+    public function create(User $user): bool
+    {
+        return in_array($user->role, [
+            UserRole::SuperAdmin, UserRole::Admin, UserRole::Manager, UserRole::Staff, UserRole::Demo,
+        ], true);
+    }
+
+    public function update(User $user, ConflictCheck $conflictCheck): bool
+    {
+        return in_array($user->role, [
+            UserRole::SuperAdmin, UserRole::Admin, UserRole::Manager, UserRole::Demo,
+        ], true);
+    }
+
+    public function delete(User $user, ConflictCheck $conflictCheck): bool
+    {
+        return $user->isAdmin();
+    }
+}
